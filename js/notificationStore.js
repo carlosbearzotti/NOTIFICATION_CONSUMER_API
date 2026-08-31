@@ -1,33 +1,43 @@
 import { generatePasswordResetEmail } from './templates/laobank-password-reset.js';
 
 /**
- * In-memory Store para Notificações & E-mails
+ * Real-time Store para Notificações & E-mails Transacionais
  */
 class NotificationStore {
   constructor() {
-    this.emails = this.loadInitialEmails();
-    this.selectedEmailId = this.emails[0]?.id || null;
+    this.emails = [];
+    this.selectedEmailId = null;
     this.listeners = [];
+    this.init();
   }
 
-  loadInitialEmails() {
-    return [
-      {
-        id: 1,
-        sender: 'LãoBank Security <seguranca@laobank.com.br>',
-        recipient: 'carlos@exemplo.com',
-        subject: '🔒 Código de Recuperação de Senha: 482915',
-        preview: 'Recebemos uma solicitação para redefinir a senha da sua conta no LãoBank Digital...',
-        status: 'DELIVERED',
-        template: 'password_reset',
-        createdAt: new Date().toISOString(),
-        html: generatePasswordResetEmail({
-          name: 'Carlos Silva',
-          email: 'carlos@exemplo.com',
-          resetCode: '482915'
-        })
+  async init() {
+    await this.fetchEmails();
+    // Polling a cada 1.5s para atualizar a caixa de entrada em tempo real quando a API Core disparar
+    setInterval(() => this.fetchEmails(), 1500);
+  }
+
+  async fetchEmails() {
+    try {
+      const res = await fetch('/api/emails');
+      if (res.ok) {
+        const serverEmails = await res.json();
+        if (Array.isArray(serverEmails)) {
+          const previousCount = this.emails.length;
+          this.emails = serverEmails;
+          
+          if (!this.selectedEmailId && this.emails.length > 0) {
+            this.selectedEmailId = this.emails[0].id;
+          } else if (this.emails.length > previousCount && previousCount > 0) {
+            // Se chegou um novo e-mail, seleciona ele automaticamente
+            this.selectedEmailId = this.emails[0].id;
+          }
+          this.notify();
+        }
       }
-    ];
+    } catch (err) {
+      // Servidor ainda iniciando
+    }
   }
 
   addEmail(emailData) {
@@ -60,7 +70,7 @@ class NotificationStore {
   }
 
   getSelected() {
-    return this.emails.find(e => e.id === this.selectedEmailId) || this.emails[0];
+    return this.emails.find(e => e.id === this.selectedEmailId) || this.emails[0] || null;
   }
 
   subscribe(fn) {
@@ -73,3 +83,4 @@ class NotificationStore {
 }
 
 export const notificationStore = new NotificationStore();
+

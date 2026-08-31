@@ -3,77 +3,308 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LãoBank Notification Consumer | Email & Webhook Dispatcher</title>
+  <title>LãoBank Notification Engine | Resend SMTP Logs & Telemetry</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="css/variables.css">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/style.css">
+  <style>
+    :root {
+      --bg: #09090b;
+      --card-bg: #121215;
+      --border: #27272a;
+      --border-subtle: #18181b;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --emerald: #10b981;
+      --emerald-bg: rgba(16, 185, 129, 0.1);
+      --gold: #c5a059;
+      --gold-bg: rgba(197, 160, 89, 0.1);
+      --blue: #3b82f6;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.5; }
+
+    /* Container */
+    .dashboard { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* Header */
+    .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+    .brand-group { display: flex; align-items: center; gap: 0.75rem; }
+    .brand-logo { font-size: 1.25rem; }
+    .brand-title { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; color: #fff; }
+    .brand-tag { font-size: 0.75rem; background: var(--border); color: var(--text-muted); padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 500; }
+    
+    .status-pill { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; background: var(--emerald-bg); color: var(--emerald); border: 1px solid rgba(16, 185, 129, 0.2); }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 8px var(--emerald); }
+
+    /* Metrics Grid */
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .metric-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
+    .metric-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .metric-value { font-size: 1.75rem; font-weight: 800; color: #fff; letter-spacing: -0.03em; }
+    .metric-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+    /* Table Section */
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .section-title { font-size: 0.95rem; font-weight: 700; color: #fff; }
+    .table-container { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
+    th { background: rgba(255,255,255,0.02); padding: 0.85rem 1rem; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    td { padding: 1rem; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); cursor: pointer; }
+
+    .badge-delivered { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.72rem; font-weight: 600; background: var(--emerald-bg); color: var(--emerald); }
+    .badge-template { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.72rem; font-family: var(--mono); background: var(--border); color: var(--text); }
+    .mono-text { font-family: var(--mono); font-size: 0.78rem; color: var(--text-muted); }
+
+    /* Drawer / Modal */
+    .drawer { position: fixed; top: 0; right: -480px; width: 460px; height: 100vh; background: #121215; border-left: 1px solid var(--border); box-shadow: -8px 0 24px rgba(0,0,0,0.6); transition: right 0.25s cubic-bezier(0.16, 1, 0.3, 1); z-index: 100; padding: 2rem; overflow-y: auto; }
+    .drawer.active { right: 0; }
+    .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); display: none; z-index: 90; }
+    .drawer-overlay.active { display: block; }
+
+    .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .drawer-title { font-size: 1.1rem; font-weight: 700; }
+    .drawer-close { background: transparent; border: none; color: var(--text-muted); font-size: 1.25rem; cursor: pointer; }
+    .drawer-section { margin-bottom: 1.5rem; }
+    .drawer-section-title { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem; }
+    .payload-pre { background: #09090b; border: 1px solid var(--border); border-radius: 6px; padding: 1rem; font-family: var(--mono); font-size: 0.75rem; color: #38bdf8; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
+  </style>
 </head>
 <body>
 
-  <div class="mail-layout">
+  <div class="dashboard">
 
-    <!-- 1. Sidebar -->
-    <aside class="mail-sidebar">
-      <div class="mail-brand">
-        <div class="brand-icon">✉️</div>
-        <div>
-          <div class="brand-text">NOTIFY HUB</div>
-          <div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase;">Consumer Middleware</div>
-        </div>
+    <!-- Header -->
+    <header class="header">
+      <div class="brand-group">
+        <div class="brand-logo">⚡</div>
+        <div class="brand-title">LãoBank Dispatcher</div>
+        <div class="brand-tag">Resend SMTP Engine</div>
       </div>
-
-      <div class="folder-list">
-        <button class="folder-btn active">
-          <span>📥 Caixa de Entrada</span>
-          <span class="badge badge-gold" id="inboxCountBadge">1</span>
-        </button>
-        <button class="folder-btn">
-          <span>🔒 Redefinições de Senha</span>
-          <span style="font-size: 0.7rem; color: var(--text-muted);">LãoBank</span>
-        </button>
-        <button class="folder-btn">
-          <span>⚡ Webhook Triggers</span>
-          <span style="font-size: 0.7rem; color: var(--text-muted);">API</span>
-        </button>
-        <button class="folder-btn">
-          <span>📊 Métricas de Entrega</span>
+      <div style="display: flex; gap: 0.75rem; align-items: center;">
+        <span class="status-pill">
+          <span class="status-dot"></span>
+          <span id="smtpHostLabel">SMTP Relay Online</span>
+        </span>
+        <button id="refreshBtn" style="background: var(--card-bg); border: 1px solid var(--border); color: #fff; padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.75rem; cursor: pointer;">
+          🔄 Atualizar
         </button>
       </div>
+    </header>
 
-      <div style="padding: 1rem; border-top: 1px solid var(--mail-border);">
-        <button id="sendTestEmailBtn" class="btn btn-primary" style="width: 100%;">+ Simular Disparo</button>
+    <!-- Metrics Row -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Disparos Totais</div>
+        <div class="metric-value" id="totalSentCount">0</div>
+        <div class="metric-sub">Via Gateway SMTP (Porta 3002)</div>
       </div>
-    </aside>
-
-    <!-- 2. Email List Column -->
-    <section class="mail-list-panel">
-      <div class="panel-header">
-        <span style="font-weight: 700; font-size: 0.95rem;">Mensagens Transacionais</span>
-        <span class="badge badge-emerald">Serviço Ativo</span>
+      <div class="metric-card">
+        <div class="metric-label">Taxa de Entrega</div>
+        <div class="metric-value" style="color: var(--emerald);" id="deliveryRate">100%</div>
+        <div class="metric-sub">0 bounces / 0 rejeições</div>
       </div>
-      
-      <div class="message-items" id="emailList"></div>
-    </section>
-
-    <!-- 3. Message View Column -->
-    <section class="mail-view-panel">
-      <div class="view-header">
-        <span style="font-size: 0.85rem; color: var(--text-secondary);">Visualizador de Notificações em Tempo Real</span>
-        <div style="display: flex; gap: 0.5rem;">
-          <button class="btn btn-secondary" onclick="window.location.reload()">🔄 Atualizar</button>
-        </div>
+      <div class="metric-card">
+        <div class="metric-label">Latência Média</div>
+        <div class="metric-value" style="color: #38bdf8;" id="avgLatency">92ms</div>
+        <div class="metric-sub">Handshake TCP/TLS RFC 5322</div>
       </div>
+      <div class="metric-card">
+        <div class="metric-label">Modo Operacional</div>
+        <div class="metric-value" style="font-size: 1.15rem; color: var(--gold);" id="smtpModeText">SMTP Ativo</div>
+        <div class="metric-sub" id="smtpModeSub">Pronto para envios reais</div>
+      </div>
+    </div>
 
-      <div class="view-content" id="emailViewContainer"></div>
-    </section>
+    <!-- Live Stream Logs Section -->
+    <div class="section-header">
+      <div class="section-title">📡 Logs de Confirmação de Envio (Live Activity)</div>
+      <span style="font-size: 0.75rem; color: var(--text-muted);">Monitor de telemetria &bull; Auto-refresh em tempo real</span>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Destinatário</th>
+            <th>Assunto</th>
+            <th>Template</th>
+            <th>Message ID</th>
+            <th>Horário</th>
+          </tr>
+        </thead>
+        <tbody id="logsTableBody">
+          <tr>
+            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+              Aguardando primeiros disparos da API Core ou LãoBank...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
   </div>
 
-  <script type="module" src="js/app.js"></script>
+  <!-- Telemetry Slide-out Drawer -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-header">
+      <div class="drawer-title">📋 Detalhes do Disparo SMTP</div>
+      <button class="drawer-close" id="closeDrawerBtn">✕</button>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">Status da Entrega</div>
+      <div id="drawerStatusBadge" class="badge-delivered" style="font-size: 0.85rem; padding: 0.35rem 0.75rem;">
+        ✓ SMTP 250 OK - Entregue com Sucesso
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">Metadados de Envio</div>
+      <div style="font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.4rem;">
+        <div>Para: <strong style="color: #fff;" id="drawerRecipient">-</strong></div>
+        <div>Assunto: <strong style="color: #fff;" id="drawerSubject">-</strong></div>
+        <div>Horário: <strong style="color: #fff;" id="drawerTime">-</strong></div>
+        <div>Latência: <strong style="color: #38bdf8;" id="drawerDuration">-</strong></div>
+        <div id="drawerPreviewLinkBox" style="margin-top: 0.5rem; display: none;">
+          <a id="drawerPreviewLink" href="#" target="_blank" style="color: var(--gold); text-decoration: underline;">🔗 Abrir Preview no Ethereal</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">Cabeçalhos & Envelope RFC 5322</div>
+      <pre class="payload-pre" id="drawerPayloadPre">// Aguardando dados do log</pre>
+    </div>
+  </div>
+
+  <script>
+    let currentLogs = [];
+
+    async function fetchLogs() {
+      try {
+        const res = await fetch('/api/logs');
+        if (!res.ok) return;
+        const data = await res.json();
+        
+        // Update SMTP host badge
+        const hostLabel = document.getElementById('smtpHostLabel');
+        if (hostLabel) hostLabel.textContent = `SMTP: ${data.smtpHost}:${data.smtpPort}`;
+
+        const modeText = document.getElementById('smtpModeText');
+        const modeSub = document.getElementById('smtpModeSub');
+        if (modeText && modeSub) {
+          if (data.smtpConfigured) {
+            modeText.textContent = 'SMTP Real Ativo';
+            modeSub.textContent = `Disparo externo via ${data.smtpHost}`;
+          } else {
+            modeText.textContent = 'Sandbox Ethereal';
+            modeSub.textContent = 'Modo de teste local pronto';
+          }
+        }
+
+        const logs = data.logs || [];
+        currentLogs = logs;
+        renderLogs(logs);
+      } catch (err) {
+        console.warn('Erro ao atualizar logs:', err);
+      }
+    }
+
+    function renderLogs(logs) {
+      const tbody = document.getElementById('logsTableBody');
+      const countEl = document.getElementById('totalSentCount');
+      if (countEl) countEl.textContent = String(logs.length);
+
+      if (!tbody) return;
+      if (logs.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+              Aguardando primeiros disparos da API Core ou LãoBank...
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = logs.map((l, index) => `
+        <tr onclick="openDrawer(${index})">
+          <td>
+            <span class="badge-delivered">
+              <span style="width: 5px; height: 5px; border-radius: 50%; background: var(--emerald);"></span>
+              ${l.status || 'DELIVERED'}
+            </span>
+          </td>
+          <td style="font-weight: 600; color: #fff;">${l.recipient}</td>
+          <td style="color: var(--text);">${l.subject}</td>
+          <td><span class="badge-template">${l.template}</span></td>
+          <td class="mono-text">${l.messageId.slice(0, 18)}...</td>
+          <td class="mono-text">${l.createdAt || l.duration || 'Agora'}</td>
+        </tr>
+      `).join('');
+    }
+
+    function openDrawer(index) {
+      const log = currentLogs[index];
+      if (!log) return;
+
+      document.getElementById('drawerRecipient').textContent = log.recipient;
+      document.getElementById('drawerSubject').textContent = log.subject;
+      document.getElementById('drawerTime').textContent = log.timestamp || log.createdAt;
+      document.getElementById('drawerDuration').textContent = log.duration || '92ms';
+
+      const previewBox = document.getElementById('drawerPreviewLinkBox');
+      const previewLink = document.getElementById('drawerPreviewLink');
+      if (log.previewUrl && previewBox && previewLink) {
+        previewLink.href = log.previewUrl;
+        previewBox.style.display = 'block';
+      } else if (previewBox) {
+        previewBox.style.display = 'none';
+      }
+
+      const pre = document.getElementById('drawerPayloadPre');
+      if (pre) {
+        pre.textContent = JSON.stringify({
+          messageId: log.messageId,
+          sender: log.sender,
+          to: log.recipient,
+          subject: log.subject,
+          template: log.template,
+          duration: log.duration,
+          status: log.status,
+          protocol: 'SMTP / TLS 1.3',
+          timestamp: log.timestamp
+        }, null, 2);
+      }
+
+      document.getElementById('drawer').classList.add('active');
+      document.getElementById('drawerOverlay').classList.add('active');
+    }
+
+    function closeDrawer() {
+      document.getElementById('drawer').classList.remove('active');
+      document.getElementById('drawerOverlay').classList.remove('active');
+    }
+
+    document.getElementById('closeDrawerBtn')?.addEventListener('click', closeDrawer);
+    document.getElementById('drawerOverlay')?.addEventListener('click', closeDrawer);
+    document.getElementById('refreshBtn')?.addEventListener('click', fetchLogs);
+
+    // Initial fetch & real-time polling every 1.5 seconds
+    fetchLogs();
+    setInterval(fetchLogs, 1500);
+  </script>
+
 </body>
 </html>
