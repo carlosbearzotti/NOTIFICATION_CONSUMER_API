@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LãoBank Notification Consumer | Email & Webhook Dispatcher</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="mail-layout">
+
+    <!-- 1. Sidebar -->
+    <aside class="mail-sidebar">
+      <div class="mail-brand">
+        <div class="brand-icon">✉️</div>
+        <div>
+          <div class="brand-text">NOTIFY HUB</div>
+          <div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase;">Consumer Middleware</div>
+        </div>
+      </div>
+
+      <div class="folder-list">
+        <button class="folder-btn active">
+          <span>📥 Caixa de Entrada</span>
+          <span class="badge badge-gold" id="inboxCountBadge">1</span>
+        </button>
+        <button class="folder-btn">
+          <span>🔒 Redefinições de Senha</span>
+          <span style="font-size: 0.7rem; color: var(--text-muted);">LãoBank</span>
+        </button>
+        <button class="folder-btn">
+          <span>⚡ Webhook Triggers</span>
+          <span style="font-size: 0.7rem; color: var(--text-muted);">API</span>
+        </button>
+        <button class="folder-btn">
+          <span>📊 Métricas de Entrega</span>
+        </button>
+      </div>
+
+      <div style="padding: 1rem; border-top: 1px solid var(--mail-border);">
+        <button id="sendTestEmailBtn" class="btn btn-primary" style="width: 100%;">+ Simular Disparo</button>
+      </div>
+    </aside>
+
+    <!-- 2. Email List Column -->
+    <section class="mail-list-panel">
+      <div class="panel-header">
+        <span style="font-weight: 700; font-size: 0.95rem;">Mensagens Transacionais</span>
+        <span class="badge badge-emerald">Serviço Ativo</span>
+      </div>
+      
+      <div class="message-items" id="emailList"></div>
+    </section>
+
+    <!-- 3. Message View Column -->
+    <section class="mail-view-panel">
+      <div class="view-header">
+        <span style="font-size: 0.85rem; color: var(--text-secondary);">Visualizador de Notificações em Tempo Real</span>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-secondary" onclick="window.location.reload()">🔄 Atualizar</button>
+        </div>
+      </div>
+
+      <div class="view-content" id="emailViewContainer"></div>
+    </section>
+
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

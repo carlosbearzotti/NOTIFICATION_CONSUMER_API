@@ -1,0 +1,208 @@
+/* Layout do Web Inbox & Dispatcher */
+.mail-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* 1. Sidebar */
+.mail-sidebar {
+  width: 260px;
+  background: var(--mail-bg-sidebar);
+  border-right: 1px solid var(--mail-border);
+  display: flex;
+  flex-direction: column;
+}
+
+.mail-brand {
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--mail-border);
+}
+
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--bank-gold-gradient);
+  color: #07090e;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.brand-text {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  background: var(--bank-gold-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.folder-list {
+  flex: 1;
+  padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.folder-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.folder-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+}
+
+.folder-btn.active {
+  background: var(--mail-bg-item-active);
+  color: var(--bank-gold-light);
+  border-color: var(--mail-border-gold);
+  font-weight: 600;
+}
+
+/* 2. Messages Column (Inbox List) */
+.mail-list-panel {
+  width: 360px;
+  background: rgba(11, 15, 25, 0.5);
+  border-right: 1px solid var(--mail-border);
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-header {
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--mail-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.message-items {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.message-card {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--mail-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.message-card:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.message-card.active {
+  background: var(--mail-bg-item-active);
+  border-left: 3px solid var(--bank-gold);
+}
+
+.message-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.message-sender {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.message-time {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.message-subject {
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--bank-gold-light);
+  margin-bottom: 0.25rem;
+}
+
+.message-preview {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 3. Preview Column */
+.mail-view-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--mail-bg-main);
+}
+
+.view-header {
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid var(--mail-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.view-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.badge-gold { background: rgba(197, 160, 89, 0.15); color: var(--bank-gold-light); border: 1px solid var(--mail-border-gold); }
+.badge-emerald { background: rgba(16, 185, 129, 0.15); color: var(--status-sent); border: 1px solid rgba(16, 185, 129, 0.3); }
+
+.btn {
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  border: none;
+}
+.btn-primary { background: var(--bank-gold-gradient); color: #07090e; }
+.btn-secondary { background: rgba(255, 255, 255, 0.08); color: var(--text-primary); border: 1px solid var(--mail-border); }
+
+/* Sandboxed Email Container */
+.email-render-frame {
+  background: #0d121f;
+  border: 1px solid var(--mail-border-gold);
+  border-radius: var(--radius-md);
+  max-width: 600px;
+  margin: 0 auto;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+}

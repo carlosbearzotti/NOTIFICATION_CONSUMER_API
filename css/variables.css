@@ -1,0 +1,37 @@
+/* =============================================================================
+   CONSUMER NOTIFICATION - DESIGN TOKENS
+   Paleta: Dark Obsidian + LãoBank Gold + Violet Glow
+   ============================================================================= */
+
+:root {
+  --mail-bg-main: #07090e;
+  --mail-bg-sidebar: #0b0f19;
+  --mail-bg-card: rgba(16, 23, 38, 0.85);
+  --mail-bg-card-hover: rgba(24, 34, 56, 0.95);
+  --mail-bg-item-active: rgba(212, 175, 55, 0.12);
+
+  --bank-gold: #c5a059;
+  --bank-gold-light: #f5d77f;
+  --bank-gold-dark: #8c6d1f;
+  --bank-gold-gradient: linear-gradient(135deg, #f5d77f 0%, #c5a059 50%, #8c6d1f 100%);
+
+  --status-sent: #10b981;
+  --status-pending: #f59e0b;
+  --status-failed: #ef4444;
+  --status-info: #38bdf8;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Cinzel', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  --mail-border: rgba(255, 255, 255, 0.08);
+  --mail-border-gold: rgba(197, 160, 89, 0.3);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+}

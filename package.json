@@ -1,0 +1,11 @@
+{
+  "name": "consumer-notification",
+  "version": "1.0.0",
+  "description": "Notification & Email Dispatcher Consumer Middleware for LãoBank",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}
