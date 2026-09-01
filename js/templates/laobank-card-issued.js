@@ -1,11 +1,12 @@
 /**
  * Template de E-mail Transacional para Emissão de Cartão Físico & Virtual - LãoBank Digital
  */
-export function generateCardIssuedEmail({ name, email, last4, address, deliveryDays }) {
+export function generateCardIssuedEmail({ name, email, last4, address, deliveryDays, pin }) {
   const safeName = name || 'Correntista LãoBank';
   const safeLast4 = last4 || '8824';
   const safeAddress = address || 'Endereço cadastrado na sua conta';
   const safeDelivery = deliveryDays || 7;
+  const safePin = pin || '4829';
 
   return `
 <!DOCTYPE html>
@@ -22,6 +23,7 @@ export function generateCardIssuedEmail({ name, email, last4, address, deliveryD
     .badge-status { display: inline-block; background: rgba(52,211,153,0.15); color: #34d399; border: 1px solid #059669; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
     .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
     .feature-card { background: rgba(255,255,255,0.03); border: 1px solid #334155; border-radius: 8px; padding: 15px; }
+    .pin-box { background: linear-gradient(135deg, rgba(197,160,89,0.15) 0%, rgba(15,23,42,0.95) 100%); border: 2px dashed rgba(197,160,89,0.5); border-radius: 10px; padding: 16px; margin: 18px 0; text-align: center; }
     .footer { text-align: center; font-size: 11px; color: #64748b; padding: 20px; border-top: 1px solid #1e293b; }
   </style>
 </head>
@@ -35,13 +37,13 @@ export function generateCardIssuedEmail({ name, email, last4, address, deliveryD
       <div class="badge-status">✓ Cartão Emitido com Sucesso</div>
       <h2 style="font-size: 20px; color: #ffffff; margin-top: 0;">Olá, ${safeName}!</h2>
       <p style="font-size: 14px; color: #94a3b8; line-height: 1.6;">
-        Temos uma ótima notícia: o seu <strong>Cartão LãoBank Black Prestige</strong> foi gerado e já está pronto para uso!
+        Temos uma ótima notícia: o seu <strong>Cartão LãoBank</strong> foi gerado e o envio do físico já foi programado!
       </p>
 
       <!-- Card Graphic Preview -->
       <div class="card-preview-box">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-          <span style="font-size: 12px; color: #c5a059; font-weight: 700; letter-spacing: 1px;">LÃOBANK PRESTIGE</span>
+          <span style="font-size: 12px; color: #c5a059; font-weight: 700; letter-spacing: 1px;">LÃOBANK DIGITAL</span>
           <span style="font-size: 14px; font-weight: 800; font-style: italic;">VISA</span>
         </div>
         <div style="font-family: monospace; font-size: 16px; letter-spacing: 3px; margin: 10px 0; color: #f1f5f9;">
@@ -50,6 +52,15 @@ export function generateCardIssuedEmail({ name, email, last4, address, deliveryD
         <div style="display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-top: 15px;">
           <div>TITULAR: <strong style="color: #fff;">${safeName.toUpperCase()}</strong></div>
           <div>VALIDADE: <strong style="color: #fff;">08/32</strong></div>
+        </div>
+      </div>
+
+      <!-- Caixa com a Senha Provisória do Cartão -->
+      <div class="pin-box">
+        <div style="font-size: 11px; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">🔑 Sua Senha Provisória do Cartão (PIN 4 Dígitos)</div>
+        <div style="font-family: monospace; font-size: 30px; font-weight: 800; color: #fbbf24; letter-spacing: 8px; margin: 8px 0;">${safePin}</div>
+        <div style="font-size: 12px; color: #94a3b8; line-height: 1.4;">
+          ⚠️ <strong>Primeiro Acesso:</strong> No seu primeiro acesso ao app, você usará este PIN inicial para cadastrar sua nova senha pessoal definitiva.
         </div>
       </div>
 

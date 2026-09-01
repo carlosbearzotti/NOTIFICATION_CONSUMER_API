@@ -131,6 +131,7 @@ const server = http.createServer(async (req, res) => {
         const last4 = payload.last4 || '8824';
         const deliveryDays = payload.deliveryDays || 7;
         const address = payload.address || 'Endereço cadastrado na conta';
+        const pin = payload.pin || payload.cardPin || '1234';
 
         if (!recipient) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -151,13 +152,14 @@ const server = http.createServer(async (req, res) => {
             dueDate
           });
         } else if (template === 'card_issued' || template === 'welcome_card') {
-          subject = subject || `💳 Seu Cartão LãoBank foi emitido! Físico em até ${deliveryDays} dias e Virtual liberado`;
+          subject = subject || `💳 Seu Cartão LãoBank foi emitido! Físico em até ${deliveryDays} dias, Virtual liberado e Senha Inicial`;
           htmlBody = generateCardIssuedEmail({
             name,
             email: recipient,
             last4,
             address,
-            deliveryDays
+            deliveryDays,
+            pin
           });
         } else {
           subject = subject || `🔒 Código de Recuperação de Senha: ${token}`;
